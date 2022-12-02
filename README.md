@@ -1,6 +1,6 @@
 # advent-of-code-2022
 
-First year taking part of this, one day at a time... let's see how far the streak lasts
+First year taking part of this, one day at a time... let's see how far the streak goes
 
 I am using Golang and TDD to tackle the challenges.
 
