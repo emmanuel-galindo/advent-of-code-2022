@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-	"bytes"
+	"examples/adventofcode2022/file_utils"
 	"fmt"
 	"io"
 	"log"
@@ -28,19 +28,15 @@ func main() {
 }
 
 func run() error {
-	inputs, err := os.OpenFile(inputsFilename, os.O_RDWR|os.O_CREATE, 0666)
+	inputsFile, closeInputsFile, err := file_utils.InputsFromFile(inputsFilename)
 	if err != nil {
 		return fmt.Errorf("problem opening %s %v", inputsFilename, err)
 	}
-	defer inputs.Close()
+	defer closeInputsFile()
 
-	data, err := GetData(inputs)
+	elves, err := CaloriesPerElf(inputsFile)
 	if err != nil {
-		return err
-	}
-	elves, err := CaloriesPerElf(bytes.NewBuffer(data))
-	if err != nil {
-		return err
+		return fmt.Errorf("problem processing calories data from %s %v", inputsFilename, err)
 	}
 	elve := MaxElf(elves)
 	fmt.Printf("Elve with most calories is %d with %d calories\n", elve, elves[elve])
@@ -48,16 +44,17 @@ func run() error {
 	sumTop3Calories := SumTop3(OrderedCalories(elves))
 	fmt.Printf("Sum of calories of top 3 elves is %d\n", sumTop3Calories)
 
-	// arr := GetCaloriesPerElf(data)
-
 	return nil
 }
 
+// InputsFromFile opens a file in the filesystem and returns a File pointer
+// OrderedCalories sorts the input calories arrays in descending order
 func OrderedCalories(calories []int) []int {
 	sort.Sort(sort.Reverse(sort.IntSlice((calories))))
 	return calories
 }
 
+// SumTop3 returns the sum of the calories from the three top elves
 func SumTop3(data []int) (sum int) {
 	for i := 0; i < 3; i++ {
 		sum += data[i]
@@ -65,6 +62,7 @@ func SumTop3(data []int) (sum int) {
 	return
 }
 
+// CaloriesPerElf processes the input data and returns calories grouped by elf
 func CaloriesPerElf(data io.Reader) ([]int, error) {
 	scanner := bufio.NewScanner(data)
 	var (
@@ -94,6 +92,7 @@ func CaloriesPerElf(data io.Reader) ([]int, error) {
 	return elves, nil
 }
 
+// MaxElf returns the elf that collected more calories
 func MaxElf(elves []int) int {
 	var max, maxi int
 	for i, v := range elves {
@@ -103,13 +102,4 @@ func MaxElf(elves []int) int {
 		}
 	}
 	return maxi
-}
-
-func GetData(inputs io.Reader) ([]byte, error) {
-	inputsContents, err := io.ReadAll(inputs)
-	if err != nil {
-		return nil, fmt.Errorf("problem opening %s %v", inputsFilename, err)
-	}
-
-	return inputsContents, nil
 }
