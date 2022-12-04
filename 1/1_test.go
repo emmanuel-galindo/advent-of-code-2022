@@ -62,32 +62,6 @@ func TestProvisioning(t *testing.T) {
 	})
 }
 
-// func assertIntEqual(t *testing.T, got int, want int) {
-// 	if got != want {
-// 		t.Errorf("got %d want %d", got, want)
-// 	}
-// }
-
-// func assertArrayEqual(t *testing.T, got []int, want []int) {
-// 	if !reflect.DeepEqual(got, want) {
-// 		t.Errorf("got %v want %v", got, want)
-// 	}
-// }
-
-// func assertStringEquals(t testing.TB, got, want string) {
-// 	t.Helper()
-// 	if got != want {
-// 		t.Errorf("got %s want %s", got, want)
-// 	}
-// }
-
-// func test_utils.AssertNoError(t testing.TB, err error) {
-// 	t.Helper()
-// 	if err != nil {
-// 		t.Fatalf("didn't expect an error but got one, %v", err)
-// 	}
-// }
-
 func createTempFile(t testing.TB, initialData string) (*os.File, func()) {
 	t.Helper()
 
