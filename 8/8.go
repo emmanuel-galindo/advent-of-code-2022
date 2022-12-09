@@ -16,13 +16,13 @@ func main() {
 	lines := strings.Split(inputsContent, "\n")
 	forest := [][]int{}
 	for _, line := range lines {
-		forest = append(forest, strtointarr(line))
+		forest = append(forest, strToIntArr(line))
 	}
 
 	visible := mapVisibleTrees(forest)
 	fmt.Printf("visible trees => %d\n", len(visible))
 
-	scenicScore := ScenicScore(forest)
+	scenicScore := findHighestScenicScore(forest)
 	fmt.Printf("highest scenic score => %d\n", scenicScore)
 
 }
@@ -32,10 +32,12 @@ func mapVisibleTrees(forest [][]int) map[coord]bool {
 	rowsLength := len(forest)
 	columnsLenght := len(forest[0])
 
+	var tallestTree int
+
 	for row := 0; row < rowsLength; row++ {
 
 		// left to right
-		tallestTree := -1
+		tallestTree = -1
 		for col := 0; col < columnsLenght; col++ {
 			if forest[row][col] > tallestTree {
 				visible[coord{row, col}] = true
@@ -54,8 +56,9 @@ func mapVisibleTrees(forest [][]int) map[coord]bool {
 	}
 
 	for col := 0; col < columnsLenght; col++ {
+
 		// bottom to top
-		tallestTree := -1
+		tallestTree = -1
 		for row := rowsLength - 1; row > 0; row-- {
 			if forest[row][col] > tallestTree {
 				visible[coord{row, col}] = true
@@ -76,7 +79,7 @@ func mapVisibleTrees(forest [][]int) map[coord]bool {
 	return visible
 }
 
-func ScenicScore(forest [][]int) int {
+func findHighestScenicScore(forest [][]int) int {
 
 	max := 0
 	rowsLength := len(forest)
@@ -140,7 +143,7 @@ func countLeft(forest [][]int, row, col int) (count int) {
 	return
 }
 
-func strtointarr(str string) (intArr []int) {
+func strToIntArr(str string) (intArr []int) {
 	for _, v := range string(str) {
 		int, _ := strconv.Atoi(string(v))
 		intArr = append(intArr, int)
