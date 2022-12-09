@@ -9,6 +9,12 @@ import (
 //go:embed inputs.txt
 var inputsContent string
 
+const (
+	totalSpace     = 70_000_000
+	updateReqSpace = 30_000_000
+	maxDirSize     = 100_000
+)
+
 type Dir struct {
 	dirs   map[string]*Dir
 	files  *[]int
@@ -20,19 +26,20 @@ type Dir struct {
 func main() {
 	lines := strings.Split(inputsContent, "\n")
 
-	// TODO send pointers instead of DIR
+	// Create the tree
 	root := &Dir{prev: nil}
 	processCommand(lines, 1, root)
-	var total int = 0
-	RecursiveSum(root, &total)
-	// ltotal := SumLowestThan(root, 100000)
-	fmt.Printf("sum of dirs with recursive total less than < 100000 => %d\n", total)
 
-	target := 30000000 - (70000000 - root.rtotal)
-	fmt.Printf("target => %d\n", target)
+	// Part 1
+	var total int = 0
+	recursiveSum(root, &total)
+	fmt.Printf("sum of dirs with recursive total less than < %d => %d\n", maxDirSize, total)
+
+	// Part 2
+	target := updateReqSpace - (totalSpace - root.rtotal)
 	smallerCandidate := root.rtotal
 	collectHigherThan(root, target, &smallerCandidate)
-	fmt.Printf("%d", smallerCandidate)
+	fmt.Printf("The size of the smallest dir to free enough space (%d) for the update is %d", target, smallerCandidate)
 }
 
 func collectHigherThan(currDir *Dir, target int, smallerCandidate *int) {
@@ -45,24 +52,28 @@ func collectHigherThan(currDir *Dir, target int, smallerCandidate *int) {
 
 }
 
-func RecursiveSum(currDir *Dir, ltotal *int) int {
-	sumTotal := sum(*currDir.files)
-	currDir.rtotal = sumTotal
+func recursiveSum(currDir *Dir, ltotal *int) int {
+	currDir.rtotal = sum(*currDir.files)
 	for dirname := range currDir.dirs {
-		currDir.rtotal += RecursiveSum(currDir.dirs[dirname], ltotal)
+		currDir.rtotal += recursiveSum(currDir.dirs[dirname], ltotal)
 	}
-	if currDir.rtotal < 100000 {
+	if currDir.rtotal < maxDirSize {
 		*ltotal += currDir.rtotal
 	}
 	return currDir.rtotal
 }
 
+// Recursiveness here is not needed, but I was deep into it when I noticed.
+// Trees and recursion is kind of a reflex.
+//
+//	In normal situations, I would just start back with something else
 func processCommand(lines []string, pos int, currDir *Dir) {
+	// circuit-break as below commands call this function
 	if pos >= len(lines) {
 		return
 	}
+
 	if dirname, ok := isCd(lines[pos]); ok {
-		// assuming ls will always come before cd
 		if dirname == ".." {
 			prevdir := currDir.prev
 			processCommand(lines, pos+1, prevdir)
@@ -74,11 +85,7 @@ func processCommand(lines []string, pos int, currDir *Dir) {
 		if files, dirs, nextPos, ok := isLs(lines, pos, currDir); ok {
 			currDir.files = files
 			currDir.dirs = dirs
-			totalSize := sum(*files)
-			currDir.total = totalSize
-			// if currDir.prev != nil {
-			// currDir.prev.total += totalSize
-			// }
+			currDir.total = sum(*files)
 			processCommand(lines, nextPos, currDir)
 		}
 	}
@@ -92,9 +99,9 @@ func sum(arr []int) (total int) {
 }
 
 func isCd(command string) (string, bool) {
-	var dirname string
-	if n, _ := fmt.Sscanf(command, "$ cd %s", &dirname); n > 0 {
-		return dirname, true
+	var dirName string
+	if n, _ := fmt.Sscanf(command, "$ cd %s", &dirName); n > 0 {
+		return dirName, true
 	}
 	return "", false
 }
@@ -104,17 +111,15 @@ func isLs(lines []string, pos int, currDir *Dir) (*[]int, map[string]*Dir, int, 
 		dirs := map[string]*Dir{}
 		files := []int{}
 		i := pos + 1
+		// first condition below is when last line of inputs file is from ls
 		for ; i < len(lines) && !strings.Contains(lines[i], "$"); i++ {
 			if strings.HasPrefix(lines[i], "dir") {
-				dirName := ""
-				fmt.Sscanf(lines[i], "dir %s", &dirName)
-				newDir := &Dir{prev: currDir}
+				dirName := strings.TrimPrefix(lines[i], "dir ")
 
-				dirs[dirName] = newDir
+				dirs[dirName] = &Dir{prev: currDir}
 			} else {
 				size := 0
 				filename := ""
-				// TODO: filename is not used, only for sscanf to compile
 				fmt.Sscanf(lines[i], "%d %s", &size, &filename)
 
 				files = append(files, size)
