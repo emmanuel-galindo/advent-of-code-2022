@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-//go:embed inputs.txt
+//go:embed inputs_test.txt
 var inputsContent string
 
 const (
@@ -140,7 +140,7 @@ func NewProcessor() Processor {
 }
 
 func (p *Processor) ParseMonkeysData(data string) {
-	p.monkeysData = strings.Split(inputsContent, "\n\n")
+	p.monkeysData = strings.Split(inputsContent, LineBreak+LineBreak)
 }
 
 func (p *Processor) CreateMonkeys() {
@@ -153,7 +153,7 @@ func (p *Processor) CreateMonkeys() {
 }
 
 func (p *Processor) CreateMonkey(monkeyData string) Monkey {
-	lines := strings.Split(monkeyData, "\n")
+	lines := strings.Split(monkeyData, LineBreak)
 	return NewMonkey(lines)
 }
 
