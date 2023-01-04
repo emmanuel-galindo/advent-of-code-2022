@@ -26,6 +26,31 @@ const (
 	lineTestFalse
 )
 
+func main() {
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(exitFail)
+	}
+}
+
+func run() error {
+	processor := NewProcessor()
+	processor.ParseMonkeysData(inputsContent)
+	processor.CreateMonkeys()
+
+	processor.ExecuteRounds(20, 3.0)
+	result := processor.CalculateMonkeyBusiness()
+	fmt.Printf("Result part1: %d\n", result)
+
+	processor.CreateMonkeys() // reset
+	processor.CalculateBigMod()
+	processor.ExecuteRounds(10000, 1.0)
+	result = processor.CalculateMonkeyBusiness()
+	fmt.Printf("Result part2: %d\n", result)
+
+	return nil
+}
+
 type Test struct {
 	divisibleBy int
 	op          func(int) int
@@ -172,31 +197,6 @@ func (p *Processor) CalculateBigMod() {
 		bigMod *= monkey.test.divisibleBy
 	}
 	p.bigMod = bigMod
-}
-
-func main() {
-	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(exitFail)
-	}
-}
-
-func run() error {
-	processor := NewProcessor()
-	processor.ParseMonkeysData(inputsContent)
-	processor.CreateMonkeys()
-
-	processor.ExecuteRounds(20, 3.0)
-	result := processor.CalculateMonkeyBusiness()
-	fmt.Printf("Result part1: %d\n", result)
-
-	processor.CreateMonkeys() // reset
-	processor.CalculateBigMod()
-	processor.ExecuteRounds(10000, 1.0)
-	result = processor.CalculateMonkeyBusiness()
-	fmt.Printf("Result part2: %d\n", result)
-
-	return nil
 }
 
 // Helpers
